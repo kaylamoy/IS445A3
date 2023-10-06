@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>This is an example webpage</title>
+    <title>Building Inventory Visualizations</title>
     <script> <script src="https://cdn.jsdelivr.net/npm/vega@5.25.0/build/vega.min.js" 
     integrity="sha256-na2uPt+tUPV7GRVpc+/ezQj+lGwljIvOJifkmg8f3as=" crossorigin="anonymous"></script>
 
@@ -16,34 +16,61 @@
     <script> src="https://cdn.jsdelivr.net/npm/vega-lite@5.15.0/build/vega-lite.min.js" 
         integrity="sha256-WLAn82Ut4GptY/IJf4K/1i+R8ibAkVLFhBVkOovqCK8=" crossorigin="anonymous"></script>
 </head>
-<body>
-    <p>
-        This is a paragraph . You can do things lik <strong>strongly</strong>emphasis
-        You can also <em>emphasize</em> text
-    </p>
-    <div> id="viz"</div>
+
+    <body>
+    <div id="visualization1"></div>
+    <div id="visualization2"></div>
+    <div id="visualization3"></div>
+
+   
     <script>
-        var viSpec = {
-            "$schema" : "https://vega.github.io/schema/vega-lite/v5.json", 
-            "data": {"url": "https://vega.github.io/editor/data/movies.json"},
-            "hconcat": [
-                {
-                    "params": [{"name": "myfirstparam", "select":"interval"}],
-                    "mark":"bar",
+        fetch('https://raw.githubusercontent.com/UIUC-iSchool-DataViz/fall2023-acg-acu/main/data/building_inventory.csv')
+            .then(response => response.text())
+            .then(data => {
+                const parsedData = new Blob([data], { type: 'text/csv' });
+                const url = URL.createObjectURL(parsedData);
+
+                // Visualization 1: Bar Chart
+                const visualization1Spec = {
+                    "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+                    "data": {"url": url, "format": {"type": "csv"}},
+                    "mark": "bar",
                     "encoding": {
-                        "x": {"field", "IMDB Rating", "type": "quantitative, "bin": true},
-                        "y" : {"aggregate": "mean", "field" : "US Gross"}
+                        "x": {"field": "Year Constructed", "type": "ordinal", "axis": {"title": "Year Constructed"}},
+                        "y": {"aggregate": "count", "type": "quantitative", "axis": {"title": "Count"}}
                     }
-                }, 
-                {
-                    "mark": "point", 
-                    "encoding" : {
-                        "x": {"field": "US Gross", "type": "quantitative"},
-                        "y": {"field": "Worldwide Gross", "type": "quantitative"},
-                        "color" : {"value":"grey", "condition": {"param":"myfirstparam"}}
+                };
+                vegaEmbed('#visualization1', visualization1Spec);
+
+                // Visualization 2: Scatter Plot
+                const visualization2Spec = {
+                    "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+                    "data": {"url": url, "format": {"type": "csv"}},
+                    "mark": "point",
+                    "encoding": {
+                        "x": {"field": "Year Constructed", "type": "quantitative", "axis": {"title": "Year Constructed"}},
+                        "y": {"field": "Square Footage", "type": "quantitative", "axis": {"title": "Square Footage"}}
                     }
-                }
-            ]
-        }</script>
+                };
+                vegaEmbed('#visualization2', visualization2Spec);
+
+                // Visualization 3: Stacked Bar Chart
+                const visualization3Spec = {
+                    "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+                    "data": {"url": url, "format": {"type": "csv"}},
+                    "mark": "bar",
+                    "encoding": {
+                        "x": {"field": "Year Constructed", "type": "ordinal", "axis": {"title": "Year Constructed"}},
+                        "y": {"aggregate": "sum", "field": "Square Footage", "type": "quantitative", "axis": {"title": "Total Square Footage"}},
+                        "color": {"field": "Building Type", "type": "nominal", "legend": {"title": "Building Type"}}
+                    }
+                };
+                vegaEmbed('#visualization3', visualization3Spec);
+            });
+    </script>
 </body>
+
 </html>
+
+
+
