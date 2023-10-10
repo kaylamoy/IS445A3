@@ -1,8 +1,71 @@
-// type "!" + enter to import all below 
-// use period to open on github
-
 <!DOCTYPE html>
 <html lang="en">
+
+    <head>
+        <meta name = "viewport" content = "width=device-width, initial-scale=1.0, maximum-scale=1.0,user-scalable=no">
+
+        <title>Building Inventory Dataset Visualizations</title>
+        <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+    </head>
+
+<body>
+    <div id = 'visualization'></div>
+
+    <script>
+        fetch('https://raw.githubusercontent.com/UIUC-iSchool-DataViz/fall2023-acg-acu/main/data/building_inventory.csv')
+        .then(response => reponse.text())
+        .then(data => {
+            const parsedData = new Blob([data], {type: 'text/csv'});
+            const url = URL.createObjectURL(parsedData);
+
+        //bar chart
+        const barChart = {
+            "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+            "data" : {"url": url, "format":{"type": "csv"}},
+            "mark": "bar", 
+            "encoding": {
+                "x": {"field": "Year Constructed", "type":"ordinal", "axis":{"title": "Year Constructed"}},
+                "y" = {"aggregate":"count", "type":"quantitative", "axis":{"title": "Count"}}
+            }
+        };
+
+        //scatter Plot
+        const scatterViz = {
+            "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+            "data" : {"url": url, "format":{"type": "csv"}},
+            "mark":"point",
+            "encoding" : {
+                "x" : {"field": "Year Constructed", "type": "quantitative", "axis": {"title": "Year Constructed"}},
+                "y" : {"field":"Square Footage", "type": "quantitative", "axis": {"title" : "Square Footage"}}
+            }
+        };
+        //stacked bar chart
+        const barChartViz = {
+            "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+            "data": {"url":url, "format" : {"type": "csv"}},
+            "mark" : "bar",
+            "encoding" : {
+                "x" : {"field" : "Year Constructed", "type": "ordinal", "axis": {"title": "Year Constructed"}},
+                "y" : {"aggregate": "sum","field": "Square Footage", "type":"quantitative", "axis":{"title":"Total Square Footage"}},
+                "color":{"field":"Building Type", "type":"normal", "legend": {"title": "Building Type"}}
+            }
+        };
+
+        //concat
+        const combinedViz = {
+            "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+            "hconcat": [barChart, scatterViz, barChartViz]
+        };
+
+        vegaEmbed('visualization', combinedViz);
+        });
+    </script>
+
+</body>
+<html>
+<!-- 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -73,4 +136,4 @@
 </html>
 
 
-
+ -->
